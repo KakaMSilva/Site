@@ -1,13 +1,22 @@
-// ── SoundCloud ────────────────────────────────────────────────
+// ── ÁUDIO ────────────────────────────────────────────────────
 const muteBtn = document.getElementById('muteBtn');
-let isMuted = false, widget = null;
+let isMuted = false;
+let widget = null;
+let playRequested = false;
 
+// Carrega a Widget API do SoundCloud
 const scScript = document.createElement('script');
 scScript.src = 'https://w.soundcloud.com/player/api.js';
 scScript.onload = () => {
   widget = SC.Widget(document.getElementById('sc-player'));
-  widget.bind(SC.Widget.Events.READY, () => { widget.setVolume(70); });
-  widget.bind(SC.Widget.Events.FINISH, () => { widget.seekTo(0); widget.play(); });
+  widget.bind(SC.Widget.Events.READY, () => {
+    widget.setVolume(70);
+    if (playRequested) widget.play();
+  });
+  widget.bind(SC.Widget.Events.FINISH, () => {
+    widget.seekTo(0);
+    widget.play();
+  });
 };
 document.head.appendChild(scScript);
 
@@ -18,24 +27,23 @@ muteBtn.addEventListener('click', () => {
   muteBtn.textContent = isMuted ? '🔇' : '🔊';
 });
 
-function tryPlay() {
-  if (widget) { widget.play(); }
-  else { setTimeout(tryPlay, 150); }
-}
-
-// ── Splash ────────────────────────────────────────────────────
+// ── SPLASH ───────────────────────────────────────────────────
 document.getElementById('startBtn').addEventListener('click', () => {
+  playRequested = true;
+  if (widget) {
+    widget.play(); 
+  }
+
   const splash = document.getElementById('splash');
   splash.style.transition = 'opacity 0.4s';
   splash.style.opacity = '0';
   setTimeout(() => { splash.style.display = 'none'; }, 400);
   muteBtn.style.display = '';
-  tryPlay();
   placeNoBtnInitial();
   buildStrip("inicial");
 });
 
-// ── App ───────────────────────────────────────────────────────
+// ── APP ──────────────────────────────────────────────────────
 const noBtn     = document.getElementById("noBtn");
 const yesBtn    = document.getElementById("yesBtn");
 const counterEl = document.getElementById("counter");
@@ -57,15 +65,15 @@ function buildStrip(phase) {
   gifStrip.innerHTML = "";
   const shuffled = [...ids].sort(() => Math.random() - 0.5);
   const count = isMobile() ? Math.min(shuffled.length, 2) : Math.min(shuffled.length, 3);
-  const positions = isMobile() ? ["gif-left","gif-right"] : ["gif-left","gif-right","gif-bottom"];
+  const positions = isMobile() ? ["gif-left", "gif-right"] : ["gif-left", "gif-right", "gif-bottom"];
   
   for (let i = 0; i < count; i++) {
     const slot = document.createElement("div");
     slot.className = `gif-slot ${positions[i]}`;
     const iframe = document.createElement("iframe");
     iframe.src = `https://tenor.com/embed/${shuffled[i]}`;
-    iframe.setAttribute("allowfullscreen","");
-    iframe.setAttribute("allow","autoplay");
+    iframe.setAttribute("allowfullscreen", "");
+    iframe.setAttribute("allow", "autoplay");
     slot.appendChild(iframe);
     gifStrip.appendChild(slot);
   }
@@ -76,7 +84,7 @@ const phrases = {
   curioso:   ["👀 Hmm... você tá pensando, né? Bom sinal!","🤨 Esse 'não' não pareceu muito convicto...","😏 Tô vendo que você tá com vontade de dizer sim","🔍 Detectei um sorrisinho aí enquanto lia...","🧐 Será que é um 'não' ou só tá fazendo charminho?","👉👈 Vai... pode aceitar, eu sei que você quer","🤔 Você clicou aí só para me ver de novo, né?","😼 Tô de olho nessa sua hesitação...","🫢 Aposto que você já tá sorrindo aí","🕵️ Suspeito, muito suspeito esse 'não'...","😌 Pode demorar, eu espero o tempo que for preciso","🙃 Esse botão não engana ninguém, sabia?"],
   triste:    ["😿 Meu coraçãozinho partiu com esse 'não'...","💔 Tô arrasado aqui, você não tá vendo?","🥺 Só uma chance, eu prometo que vai ser incrível","🌧️ Até o céu ficou nublado com sua negativa...","😢 Mais um 'não'? Vou fingir que não doeu...","🥹 Eu só queria um sim, sabe...","📉 Minha autoestima caiu mais um pouquinho agora","😞 Tá difícil assim me dar uma chance?","🫠 Sinto que tô derretendo de tanta tristeza aqui","🎻 Já tô até ouvindo uma música triste de fundo","😔 Vou anotar mais um 'não' na minha listinha...","🥀 Essa flor aqui murchou com seu 'não'"],
   assustado: ["😱 PERAÍ! Você não pode me deixar assim!","😨 Fiquei em choque com esse 'não'...","🙀 Meu coração quase parou aqui!","😰 Vai me deixar sem chão não, por favor!","😳 Quantos 'nãos' ainda cabem nesse seu coração?!","😵 Tá rolando um terremoto na minha confiança agora","🫣 Não vou nem fingir, isso me assustou de verdade","😬 Cada clique nesse botão me dá um treco","👻 Esse botão de recusar parece assombrado, só pode","😖 Socorro, minha esperança tá em queda livre!","🫨 Isso foi um abalo sísmico no meu coração","🚨 Alerta vermelho: muitos 'nãos' detectados!"],
-  raiva:     ["😡 Tá bom, mas eu vou continuar tentando!","🔥 Nem me conformo com esse 'não'!","💢 Olha o tamanho do 'sim' aí, vai negar isso?!","😤 Eu MEREÇO uma chance e você sabe disso!","👹 Recusar de novo? Essa raiva tá ficando grande...","🌋 Tô prestes a entrar em erupção de tanto 'não'!","😠 Esse botão de recusar já era pra ter sumido!","🥊 Tá testando minha paciência, hein?!","💥 BOOM! Mais um 'não' explodindo minha paciência","😾 Tá de sacanagem com esse tanto de 'não'?","😡 Quanto mais você recusa, mais eu insisto!","👊 Tô ficando teimoso igual você agora"],
+  raiva:     ["😡 Tá bom, mas eu voy continuar tentando!","🔥 Nem me conformo com esse 'não'!","💢 Olha o tamanho do 'sim' aí, vai negar isso?!","😤 Eu MEREÇO uma chance e você sabe disso!","👹 Recusar de novo? Essa raiva tá ficando grande...","🌋 Tô prestes a entrar em erupção de tanto 'não'!","😠 Esse botão de recusar já era pra ter sumido!","🥊 Tá testando minha paciência, hein?!","💥 BOOM! Mais um 'não' explodindo minha paciência","😾 Tá de sacanagem com esse tanto de 'não'?","😡 Quanto mais você recusa, mais eu insisto!","👊 Tô ficando teimoso igual você agora"],
 };
 
 function getPhase() {
@@ -106,17 +114,18 @@ function getForbiddenRects() {
 }
 
 function overlapsAny(cx,cy,cw,ch,fbs) {
-  return fbs.some(f => !(cx+cw<f.x || cx>f.x+f.w || cy+ch<f.y || cy>f.y+f.h));
+  return fbs.some(f => !(cx+cw<f.x||cx>f.x+f.w||cy+ch<f.y||cy>f.y+f.h));
 }
 
 function placeNoBtnInitial() {
   const bw = noBtn.offsetWidth||130, bh = noBtn.offsetHeight||48;
   let sx, sy;
   if (isMobile()) {
-    const cr = getCardRect();
     sx = (window.innerWidth - bw) / 2;
-    sy = cr ? cr.bottom + 28 : window.innerHeight * 0.72;
-    if (sy + bh > window.innerHeight - 16) sy = window.innerHeight - bh - 16;
+    sy = window.innerHeight - bh - clamp(140, 28 * window.innerWidth / 100, 180);
+    const cr = getCardRect();
+    if (cr && sy < cr.bottom + 20) sy = cr.bottom + 20;
+    if (sy + bh > window.innerHeight - 150) sy = window.innerHeight - bh - 150;
   } else {
     sx = (window.innerWidth - bw) / 2;
     sy = Math.max(12, (window.innerHeight - bh) / 2 + 110);
@@ -126,24 +135,34 @@ function placeNoBtnInitial() {
   if (overlapsAny(sx, sy, bw, bh, getForbiddenRects())) moveNoBtn();
 }
 
+function clamp(min, val, max) { return Math.min(Math.max(val, min), max); }
+
 function moveNoBtn() {
   const bw = noBtn.offsetWidth||130, bh = noBtn.offsetHeight||48, mg = 14;
   const maxX = Math.max(mg, window.innerWidth  - bw - mg);
-  const maxY = Math.max(mg, window.innerHeight - bh - mg);
-  const curX = parseInt(noBtn.style.left, 10) || window.innerWidth  / 2;
-  const curY = parseInt(noBtn.style.top,  10) || window.innerHeight / 2;
+  const curX = parseInt(noBtn.style.left,10)||window.innerWidth/2;
+  const curY = parseInt(noBtn.style.top, 10)||window.innerHeight/2;
   const fbs  = getForbiddenRects();
-  const cr = isMobile() ? getCardRect() : null;
+
+  let minY, maxY;
+  if (isMobile()) {
+    const cr = getCardRect();
+    minY = cr ? cr.bottom + 10 : window.innerHeight * 0.45;
+    maxY = window.innerHeight - bh - clamp(130, 26 * window.innerWidth / 100, 170);
+    if (maxY < minY) maxY = minY + 10;
+  } else {
+    minY = mg;
+    maxY = Math.max(mg, window.innerHeight - bh - mg);
+  }
+
   let nx, ny, tries = 0;
   do {
     nx = mg + Math.random() * (maxX - mg);
-    ny = mg + Math.random() * (maxY - mg);
+    ny = minY + Math.random() * Math.max(1, maxY - minY);
     tries++;
-    const farEnough   = Math.hypot(nx - curX, ny - curY) >= 100;
-    const noOverlap   = !overlapsAny(nx, ny, bw, bh, fbs);
-    const okMobile    = !cr || ny < cr.top - 10 || ny > cr.bottom + 10;
-    if (farEnough && noOverlap && (!isMobile() || okMobile)) break;
+    if (Math.hypot(nx-curX, ny-curY) >= 90 && !overlapsAny(nx,ny,bw,bh,fbs)) break;
   } while (tries < 100);
+
   noBtn.style.left = nx + 'px';
   noBtn.style.top  = ny + 'px';
 }
@@ -190,10 +209,10 @@ function onEvade() {
   attempts++;
   counterEl.textContent = attempts;
   moveNoBtn();
-  const phase = getPhase(), pool = phrases[phase] || phrases.curioso;
+  const phase = getPhase(), pool = phrases[phase]||phrases.curioso;
   messageEl.style.opacity = "0";
   setTimeout(() => {
-    messageEl.textContent  = pool[Math.floor(Math.random() * pool.length)];
+    messageEl.textContent   = pool[Math.floor(Math.random()*pool.length)];
     messageEl.style.opacity = "1";
     messageEl.style.animation = "msgFade 0.35s ease both";
   }, 180);
@@ -209,7 +228,7 @@ function createHearts(n) {
   const icons = ["❤️","💖","💗","💘","💝","🌹","✨","💫","🎉","🥳"];
   for (let i = 0; i < n; i++) {
     const h = document.createElement("div");
-    h.textContent = icons[Math.floor(Math.random() * icons.length)];
+    h.textContent = icons[Math.floor(Math.random()*icons.length)];
     h.style.cssText = `position:fixed;left:${Math.random()*100}vw;top:-40px;font-size:${16+Math.random()*26}px;opacity:.9;z-index:9999;pointer-events:none;animation:fall ${3+Math.random()*2.5}s linear forwards;`;
     document.body.appendChild(h);
     setTimeout(() => h.remove(), 7000);
