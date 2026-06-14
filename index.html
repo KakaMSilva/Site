@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>💖 Pedido Especial</title>
-
-  <link rel="stylesheet" href="style.css">
-
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- SPLASH -->
   <div id="splash">
     <div class="splash-heart">💖</div>
     <h2>Tenho uma mensagem especial<br>pra você! 🌹</h2>
@@ -19,34 +16,26 @@
     <button id="startBtn">Abrir 💕</button>
   </div>
 
-  <!-- SoundCloud -->
   <iframe id="sc-player"
     src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fgmzfdnn%2Fgeorge-michael-careless&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false"
     allow="autoplay">
   </iframe>
 
-  <button id="muteBtn">🔊</button>
+  <button id="muteBtn" title="Ligar/desligar música">🔊</button>
 
   <div class="card">
     <h1>🌹 Você quer sair comigo?</h1>
     <p id="message">Tenho algo muito especial pra te propor... 💕</p>
-
-    <div class="stats">
-      Vezes que tentou me escapar:
-      <span id="counter">0</span>
-    </div>
-
+    <div class="stats">Vezes que tentou me escapar: <span id="counter">0</span></div>
     <div style="display:flex;justify-content:center;">
       <button id="yesBtn">💖 Sim, quero muito!</button>
     </div>
   </div>
 
   <div id="gifStrip"></div>
-
   <button id="noBtn">😅 Não...</button>
 
   <script async src="https://tenor.com/embed.js"></script>
   <script src="script.js"></script>
-
 </body>
 </html>
