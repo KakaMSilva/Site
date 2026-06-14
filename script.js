@@ -1,56 +1,48 @@
-// ── SoundCloud Widget API ─────────────────────────────────────────
+// ── SoundCloud ────────────────────────────────────────────────
 const muteBtn = document.getElementById('muteBtn');
-let isMuted = false;
-let widget = null;
+let isMuted = false, widget = null;
 
-function initSC() {
-  const scIframe = document.getElementById('sc-player');
-  widget = SC.Widget(scIframe);
-  widget.bind(SC.Widget.Events.READY, () => { widget.setVolume(70); });
-  widget.bind(SC.Widget.Events.FINISH, () => { widget.seekTo(0); widget.play(); });
-}
-
-// Carrega o script do SC dinamicamente e inicia o widget após
 const scScript = document.createElement('script');
 scScript.src = 'https://w.soundcloud.com/player/api.js';
-scScript.onload = initSC;
+scScript.onload = () => {
+  widget = SC.Widget(document.getElementById('sc-player'));
+  widget.bind(SC.Widget.Events.READY, () => { widget.setVolume(70); });
+  widget.bind(SC.Widget.Events.FINISH, () => { widget.seekTo(0); widget.play(); });
+};
 document.head.appendChild(scScript);
 
 muteBtn.addEventListener('click', () => {
   if (!widget) return;
-  if (isMuted) {
-    widget.setVolume(70); muteBtn.textContent = '🔊'; isMuted = false;
-  } else {
-    widget.setVolume(0); muteBtn.textContent = '🔇'; isMuted = true;
-  }
+  isMuted = !isMuted;
+  widget.setVolume(isMuted ? 0 : 70);
+  muteBtn.textContent = isMuted ? '🔇' : '🔊';
 });
 
-// ── Splash ────────────────────────────────────────────────────────
+function tryPlay() {
+  if (widget) { widget.play(); }
+  else { setTimeout(tryPlay, 150); }
+}
+
+// ── Splash ────────────────────────────────────────────────────
 document.getElementById('startBtn').addEventListener('click', () => {
   const splash = document.getElementById('splash');
   splash.style.transition = 'opacity 0.4s';
   splash.style.opacity = '0';
   setTimeout(() => { splash.style.display = 'none'; }, 400);
-
   muteBtn.style.display = '';
-
-  function tryPlay() {
-    if (widget) { widget.play(); }
-    else { setTimeout(tryPlay, 150); }
-  }
   tryPlay();
-
   placeNoBtnInitial();
   buildStrip("inicial");
 });
 
-// ── App ───────────────────────────────────────────────────────────
+// ── App ───────────────────────────────────────────────────────
 const noBtn     = document.getElementById("noBtn");
 const yesBtn    = document.getElementById("yesBtn");
 const counterEl = document.getElementById("counter");
 const messageEl = document.getElementById("message");
 const gifStrip  = document.getElementById("gifStrip");
 let attempts = 0, accepted = false;
+const isMobile = () => window.innerWidth <= 760;
 
 const tenorIds = {
   inicial:   ["8023375962562896665","9564734588490477444","22943889"],
@@ -64,21 +56,24 @@ function buildStrip(phase) {
   const ids = tenorIds[phase] || [];
   gifStrip.innerHTML = "";
   const shuffled = [...ids].sort(() => Math.random() - 0.5);
-  const count = Math.min(shuffled.length, 3);
-  const positions = count >= 3 ? ["gif-left","gif-right","gif-bottom"] : count === 2 ? ["gif-left","gif-right"] : ["gif-bottom"];
+  const count = isMobile() ? Math.min(shuffled.length, 2) : Math.min(shuffled.length, 3);
+  const positions = isMobile() ? ["gif-left","gif-right"] : ["gif-left","gif-right","gif-bottom"];
+  
   for (let i = 0; i < count; i++) {
     const slot = document.createElement("div");
     slot.className = `gif-slot ${positions[i]}`;
     const iframe = document.createElement("iframe");
     iframe.src = `https://tenor.com/embed/${shuffled[i]}`;
-    iframe.setAttribute("allowfullscreen",""); iframe.setAttribute("allow","autoplay");
-    slot.appendChild(iframe); gifStrip.appendChild(slot);
+    iframe.setAttribute("allowfullscreen","");
+    iframe.setAttribute("allow","autoplay");
+    slot.appendChild(iframe);
+    gifStrip.appendChild(slot);
   }
 }
 
 const phrases = {
   inicial:   ["Tenho algo muito especial pra te propor... 💕","Olha, preciso de coragem pra perguntar isso... 🌹"],
-  curioso:   ["👀 Hmm... você tá pensando, né? Bom sinal!","🤨 Esse 'não' não pareceu muito convicto...","😏 Tô vendo que você tá com vontade de dizer sim","🔍 Detectei um sorrisinho aí enquanto lia...","🧐 Será que é um 'não' ou só tá fazendo charminho?","👉👈 Vai... pode aceitar, eu sei que você quer","🤔 Você clicou aí só para me ver de novo, né?","😼 Tô de olho nessa sua hesitação...","🫢 Aposto que você já tá sorrindo aí","🕵️ Suspeito, muito suspeito esse 'não'...","😌 Pode demorar, eu espero o tempo que for preciso","🙃 Esse botão não engana ninguém, sabia?"],
+  curioso:   ["👀 Hmm... você tá pensando, né? Bom sinal!","🤨 Esse 'não' não pareceu muito convicto...","😏 Tô vendo que você tá com vontade de dizer sim","🔍 Detectei um sorrisinho aí enquanto lua...","🧐 Será que é um 'não' ou só tá fazendo charminho?","👉👈 Vai... pode aceitar, eu sei que você quer","🤔 Você clicou aí só para me ver de novo, né?","😼 Tô de olho nessa sua hesitação...","🫢 Aposto que você já tá sorrindo aí","🕵️ Suspeito, muito suspeito esse 'não'...","😌 Pode demorar, eu espero o tempo que for preciso","🙃 Esse botão não engana ninguém, sabia?"],
   triste:    ["😿 Meu coraçãozinho partiu com esse 'não'...","💔 Tô arrasado aqui, você não tá vendo?","🥺 Só uma chance, eu prometo que vai ser incrível","🌧️ Até o céu ficou nublado com sua negativa...","😢 Mais um 'não'? Vou fingir que não doeu...","🥹 Eu só queria um sim, sabe...","📉 Minha autoestima caiu mais um pouquinho agora","😞 Tá difícil assim me dar uma chance?","🫠 Sinto que tô derretendo de tanta tristeza aqui","🎻 Já tô até ouvindo uma música triste de fundo","😔 Vou anotar mais um 'não' na minha listinha...","🥀 Essa flor aqui murchou com seu 'não'"],
   assustado: ["😱 PERAÍ! Você não pode me deixar assim!","😨 Fiquei em choque com esse 'não'...","🙀 Meu coração quase parou aqui!","😰 Vai me deixar sem chão não, por favor!","😳 Quantos 'nãos' ainda cabem nesse seu coração?!","😵 Tá rolando um terremoto na minha confiança agora","🫣 Não vou nem fingir, isso me assustou de verdade","😬 Cada clique nesse botão me dá um treco","👻 Esse botão de recusar parece assombrado, só pode","😖 Socorro, minha esperança tá em queda livre!","🫨 Isso foi um abalo sísmico no meu coração","🚨 Alerta vermelho: muitos 'nãos' detectados!"],
   raiva:     ["😡 Tá bom, mas eu vou continuar tentando!","🔥 Nem me conformo com esse 'não'!","💢 Olha o tamanho do 'sim' aí, vai negar isso?!","😤 Eu MEREÇO uma chance e você sabe disso!","👹 Recusar de novo? Essa raiva tá ficando grande...","🌋 Tô prestes a entrar em erupção de tanto 'não'!","😠 Esse botão de recusar já era pra ter sumido!","🥊 Tá testando minha paciência, hein?!","💥 BOOM! Mais um 'não' explodindo minha paciência","😾 Tá de sacanagem com esse tanto de 'não'?","😡 Quanto mais você recusa, mais eu insisto!","👊 Tô ficando teimoso igual você agora"],
@@ -92,110 +87,149 @@ function getPhase() {
   return "raiva";
 }
 
-function getForbiddenRects() {
-  const pad = 20, rects = [];
+// ── Posicionamento do botão Não ──────────────────────────────
+function getCardRect() {
   const card = document.querySelector(".card");
-  if (card) { const r = card.getBoundingClientRect(); rects.push({x:r.left-pad,y:r.top-pad,w:r.width+pad*2,h:r.height+pad*2}); }
-  const yes = document.getElementById("yesBtn");
-  if (yes) { const r = yes.getBoundingClientRect(); rects.push({x:r.left-pad,y:r.top-pad,w:r.width+pad*2,h:r.height+pad*2}); }
+  return card ? card.getBoundingClientRect() : null;
+}
+
+function getForbiddenRects() {
+  const pad = 18, rects = [];
+  const cr = getCardRect();
+  if (cr) rects.push({x:cr.left-pad, y:cr.top-pad, w:cr.width+pad*2, h:cr.height+pad*2});
+  const yr = yesBtn.getBoundingClientRect();
+  if (yr.width) rects.push({x:yr.left-pad, y:yr.top-pad, w:yr.width+pad*2, h:yr.height+pad*2});
   document.querySelectorAll(".gif-slot").forEach(el => {
     const r = el.getBoundingClientRect();
-    if (r.width && r.height) rects.push({x:r.left-pad,y:r.top-pad,w:r.width+pad*2,h:r.height+pad*2});
+    if (r.width && r.height) rects.push({x:r.left-pad, y:r.top-pad, w:r.width+pad*2, h:r.height+pad*2});
   });
   return rects;
 }
 
 function overlapsAny(cx,cy,cw,ch,fbs) {
-  return fbs.some(f => !(cx+cw<f.x||cx>f.x+f.w||cy+ch<f.y||cy>f.y+f.h));
+  return fbs.some(f => !(cx+cw<f.x || cx>f.x+f.w || cy+ch<f.y || cy>f.y+f.h));
 }
 
 function placeNoBtnInitial() {
-  const bw=noBtn.offsetWidth||140, bh=noBtn.offsetHeight||50;
-  const sx=(window.innerWidth-bw)/2, sy=Math.max(12,(window.innerHeight-bh)/2+110);
-  noBtn.style.left=sx+'px'; noBtn.style.top=sy+'px';
-  if (overlapsAny(sx,sy,bw,bh,getForbiddenRects())) moveNoBtn();
+  const bw = noBtn.offsetWidth||130, bh = noBtn.offsetHeight||48;
+  let sx, sy;
+  if (isMobile()) {
+    const cr = getCardRect();
+    sx = (window.innerWidth - bw) / 2;
+    sy = cr ? cr.bottom + 28 : window.innerHeight * 0.72;
+    if (sy + bh > window.innerHeight - 16) sy = window.innerHeight - bh - 16;
+  } else {
+    sx = (window.innerWidth - bw) / 2;
+    sy = Math.max(12, (window.innerHeight - bh) / 2 + 110);
+  }
+  noBtn.style.left = sx + 'px';
+  noBtn.style.top  = sy + 'px';
+  if (overlapsAny(sx, sy, bw, bh, getForbiddenRects())) moveNoBtn();
 }
 
 function moveNoBtn() {
-  const bw=noBtn.offsetWidth||140, bh=noBtn.offsetHeight||50, mg=16;
-  const maxX=Math.max(mg,window.innerWidth-bw-mg), maxY=Math.max(mg,window.innerHeight-bh-mg);
-  const curX=parseInt(noBtn.style.left,10)||window.innerWidth/2;
-  const curY=parseInt(noBtn.style.top,10)||window.innerHeight/2;
-  const fbs=getForbiddenRects();
-  let nx,ny,tries=0;
+  const bw = noBtn.offsetWidth||130, bh = noBtn.offsetHeight||48, mg = 14;
+  const maxX = Math.max(mg, window.innerWidth  - bw - mg);
+  const maxY = Math.max(mg, window.innerHeight - bh - mg);
+  const curX = parseInt(noBtn.style.left, 10) || window.innerWidth  / 2;
+  const curY = parseInt(noBtn.style.top,  10) || window.innerHeight / 2;
+  const fbs  = getForbiddenRects();
+  const cr = isMobile() ? getCardRect() : null;
+  let nx, ny, tries = 0;
   do {
-    nx=mg+Math.random()*(maxX-mg); ny=mg+Math.random()*(maxY-mg); tries++;
-    if (Math.hypot(nx-curX,ny-curY)>=120 && !overlapsAny(nx,ny,bw,bh,fbs)) break;
-  } while(tries<80);
-  noBtn.style.left=nx+'px'; noBtn.style.top=ny+'px';
+    nx = mg + Math.random() * (maxX - mg);
+    ny = mg + Math.random() * (maxY - mg);
+    tries++;
+    const farEnough   = Math.hypot(nx - curX, ny - curY) >= 100;
+    const noOverlap   = !overlapsAny(nx, ny, bw, bh, fbs);
+    const okMobile    = !cr || ny < cr.top - 10 || ny > cr.bottom + 10;
+    if (farEnough && noOverlap && (!isMobile() || okMobile)) break;
+  } while (tries < 100);
+  noBtn.style.left = nx + 'px';
+  noBtn.style.top  = ny + 'px';
 }
 
-const GROW_STEP=3, EDGE_PAD=20, ELEM_GAP=20;
-const OBSTACLES=[".card h1","#message",".stats"];
+// ── Crescimento do botão Sim ──────────────────────────────────
+const GROW_STEP = 3, EDGE_PAD = 16, ELEM_GAP = 16;
 
 function wouldHitSomething(testFs) {
-  const prev=yesBtn.style.fontSize, prevT=yesBtn.style.transition;
-  yesBtn.style.transition="none"; yesBtn.style.fontSize=testFs+'px';
+  const prev = yesBtn.style.fontSize, prevT = yesBtn.style.transition;
+  yesBtn.style.transition = "none";
+  yesBtn.style.fontSize   = testFs + 'px';
   void yesBtn.offsetWidth;
-  const r=yesBtn.getBoundingClientRect();
-  yesBtn.style.fontSize=prev; yesBtn.style.transition=prevT;
+  const r = yesBtn.getBoundingClientRect();
+  yesBtn.style.fontSize   = prev;
+  yesBtn.style.transition = prevT;
   void yesBtn.offsetWidth;
   if (r.left<EDGE_PAD||r.top<EDGE_PAD||r.right>window.innerWidth-EDGE_PAD||r.bottom>window.innerHeight-EDGE_PAD) return true;
-  for (const sel of OBSTACLES) {
-    const el=document.querySelector(sel); if(!el) continue;
-    const o=el.getBoundingClientRect(); if(!o.width||!o.height) continue;
-    if(!(r.right+ELEM_GAP<o.left||r.left-ELEM_GAP>o.right||r.bottom+ELEM_GAP<o.top||r.top-ELEM_GAP>o.bottom)) return true;
+  for (const sel of [".card h1","#message",".stats"]) {
+    const el = document.querySelector(sel); if (!el) continue;
+    const o  = el.getBoundingClientRect(); if (!o.width||!o.height) continue;
+    if (!(r.right+ELEM_GAP<o.left||r.left-ELEM_GAP>o.right||r.bottom+ELEM_GAP<o.top||r.top-ELEM_GAP>o.bottom)) return true;
   }
   for (const el of document.querySelectorAll(".gif-slot")) {
-    const o=el.getBoundingClientRect(); if(!o.width||!o.height) continue;
-    if(!(r.right+ELEM_GAP<o.left||r.left-ELEM_GAP>o.right||r.bottom+ELEM_GAP<o.top||r.top-ELEM_GAP>o.bottom)) return true;
+    const o = el.getBoundingClientRect(); if (!o.width||!o.height) continue;
+    if (!(r.right+ELEM_GAP<o.left||r.left-ELEM_GAP>o.right||r.bottom+ELEM_GAP<o.top||r.top-ELEM_GAP>o.bottom)) return true;
   }
-  const nb=noBtn.getBoundingClientRect();
-  if(nb.width&&nb.height&&!(r.right+ELEM_GAP<nb.left||r.left-ELEM_GAP>nb.right||r.bottom+ELEM_GAP<nb.top||r.top-ELEM_GAP>nb.bottom)) return true;
+  const nb = noBtn.getBoundingClientRect();
+  if (nb.width&&!(r.right+ELEM_GAP<nb.left||r.left-ELEM_GAP>nb.right||r.bottom+ELEM_GAP<nb.top||r.top-ELEM_GAP>nb.bottom)) return true;
   return false;
 }
 
 function tryGrowYesBtn() {
-  const curFs=parseFloat(window.getComputedStyle(yesBtn).fontSize);
-  const nextFs=curFs+GROW_STEP;
+  const curFs  = parseFloat(window.getComputedStyle(yesBtn).fontSize);
+  const nextFs = curFs + GROW_STEP;
   if (!wouldHitSomething(nextFs)) {
-    yesBtn.style.transition="font-size 0.6s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s";
-    yesBtn.style.fontSize=nextFs+'px';
-    yesBtn.addEventListener("transitionend",()=>{ yesBtn.style.animation="pulse 2.4s ease-in-out infinite"; },{once:true});
+    yesBtn.style.fontSize = nextFs + 'px';
+    yesBtn.addEventListener("transitionend", () => {
+      yesBtn.style.animation = "pulse 2.4s ease-in-out infinite";
+    }, {once:true});
   }
 }
 
+// ── Evade ────────────────────────────────────────────────────
 function onEvade() {
   if (accepted) return;
-  attempts++; counterEl.textContent=attempts;
+  attempts++;
+  counterEl.textContent = attempts;
   moveNoBtn();
-  const phase=getPhase(), pool=phrases[phase]||phrases.curioso;
-  messageEl.style.opacity="0";
-  setTimeout(()=>{
-    messageEl.textContent=pool[Math.floor(Math.random()*pool.length)];
-    messageEl.style.opacity="1"; messageEl.style.animation="msgFade 0.35s ease both";
-  },180);
-  buildStrip(phase); tryGrowYesBtn();
+  const phase = getPhase(), pool = phrases[phase] || phrases.curioso;
+  messageEl.style.opacity = "0";
+  setTimeout(() => {
+    messageEl.textContent   = pool[Math.floor(Math.random() * pool.length)];
+    messageEl.style.opacity = "1";
+    messageEl.style.animation = "msgFade 0.35s ease both";
+  }, 180);
+  buildStrip(phase);
+  tryGrowYesBtn();
 }
 
+noBtn.addEventListener("mouseover",  onEvade);
+noBtn.addEventListener("touchstart", e => { e.preventDefault(); onEvade(); }, {passive:false});
+window.addEventListener("resize",    () => { if (!accepted) placeNoBtnInitial(); });
+
+// ── Corações ─────────────────────────────────────────────────
 function createHearts(n) {
-  const icons=["❤️","💖","💗","💘","💝","🌹","✨","💫","🎉","🥳"];
-  for (let i=0;i<n;i++) {
-    const h=document.createElement("div");
-    h.textContent=icons[Math.floor(Math.random()*icons.length)];
-    h.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-40px;font-size:${18+Math.random()*28}px;opacity:.9;z-index:9999;pointer-events:none;animation:fall ${3+Math.random()*2.5}s linear forwards;`;
-    document.body.appendChild(h); setTimeout(()=>h.remove(),7000);
+  const icons = ["❤️","💖","💗","💘","💝","🌹","✨","💫","🎉","🥳"];
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement("div");
+    h.textContent = icons[Math.floor(Math.random() * icons.length)];
+    h.style.cssText = `position:fixed;left:${Math.random()*100}vw;top:-40px;font-size:${16+Math.random()*26}px;opacity:.9;z-index:9999;pointer-events:none;animation:fall ${3+Math.random()*2.5}s linear forwards;`;
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 7000);
   }
 }
 
-yesBtn.addEventListener("click",()=>{
+// ── Aceitar ──────────────────────────────────────────────────
+yesBtn.addEventListener("click", () => {
   if (accepted) return;
-  accepted=true;
-  noBtn.style.display="none"; gifStrip.style.display="none";
-  messageEl.textContent="🎉 ELA DISSE SIM! Preparando o date perfeito...";
+  accepted = true;
+  noBtn.style.display    = "none";
+  gifStrip.style.display = "none";
+  messageEl.textContent  = "🎉 ELA DISSE SIM! Preparando o date perfeito...";
   createHearts(80);
-  setTimeout(()=>{
-    document.body.innerHTML=`
+  setTimeout(() => {
+    document.body.innerHTML = `
       <div class="success-screen">
         <div class="success-emoji">🥰</div>
         <h1>🎉 ELA DISSE SIM! 🎉</h1>
@@ -212,9 +246,5 @@ yesBtn.addEventListener("click",()=>{
         </div>
         <button onclick="location.reload()" class="restart-btn">Perguntar de novo 💖</button>
       </div>`;
-  },2500);
+  }, 2500);
 });
-
-noBtn.addEventListener("mouseover", onEvade);
-noBtn.addEventListener("touchstart", e=>{ e.preventDefault(); onEvade(); },{passive:false});
-window.addEventListener("resize",()=>{ if(!accepted) placeNoBtnInitial(); });
