@@ -73,7 +73,7 @@ function buildStrip(phase) {
 
 const phrases = {
   inicial:   ["Tenho algo muito especial pra te propor... 💕","Olha, preciso de coragem pra perguntar isso... 🌹"],
-  curioso:   ["👀 Hmm... você tá pensando, né? Bom sinal!","🤨 Esse 'não' não pareceu muito convicto...","😏 Tô vendo que você tá com vontade de dizer sim","🔍 Detectei um sorrisinho aí enquanto lua...","🧐 Será que é um 'não' ou só tá fazendo charminho?","👉👈 Vai... pode aceitar, eu sei que você quer","🤔 Você clicou aí só para me ver de novo, né?","😼 Tô de olho nessa sua hesitação...","🫢 Aposto que você já tá sorrindo aí","🕵️ Suspeito, muito suspeito esse 'não'...","😌 Pode demorar, eu espero o tempo que for preciso","🙃 Esse botão não engana ninguém, sabia?"],
+  curioso:   ["👀 Hmm... você tá pensando, né? Bom sinal!","🤨 Esse 'não' não pareceu muito convicto...","😏 Tô vendo que você tá com vontade de dizer sim","🔍 Detectei um sorrisinho aí enquanto lia...","🧐 Será que é um 'não' ou só tá fazendo charminho?","👉👈 Vai... pode aceitar, eu sei que você quer","🤔 Você clicou aí só para me ver de novo, né?","😼 Tô de olho nessa sua hesitação...","🫢 Aposto que você já tá sorrindo aí","🕵️ Suspeito, muito suspeito esse 'não'...","😌 Pode demorar, eu espero o tempo que for preciso","🙃 Esse botão não engana ninguém, sabia?"],
   triste:    ["😿 Meu coraçãozinho partiu com esse 'não'...","💔 Tô arrasado aqui, você não tá vendo?","🥺 Só uma chance, eu prometo que vai ser incrível","🌧️ Até o céu ficou nublado com sua negativa...","😢 Mais um 'não'? Vou fingir que não doeu...","🥹 Eu só queria um sim, sabe...","📉 Minha autoestima caiu mais um pouquinho agora","😞 Tá difícil assim me dar uma chance?","🫠 Sinto que tô derretendo de tanta tristeza aqui","🎻 Já tô até ouvindo uma música triste de fundo","😔 Vou anotar mais um 'não' na minha listinha...","🥀 Essa flor aqui murchou com seu 'não'"],
   assustado: ["😱 PERAÍ! Você não pode me deixar assim!","😨 Fiquei em choque com esse 'não'...","🙀 Meu coração quase parou aqui!","😰 Vai me deixar sem chão não, por favor!","😳 Quantos 'nãos' ainda cabem nesse seu coração?!","😵 Tá rolando um terremoto na minha confiança agora","🫣 Não vou nem fingir, isso me assustou de verdade","😬 Cada clique nesse botão me dá um treco","👻 Esse botão de recusar parece assombrado, só pode","😖 Socorro, minha esperança tá em queda livre!","🫨 Isso foi um abalo sísmico no meu coração","🚨 Alerta vermelho: muitos 'nãos' detectados!"],
   raiva:     ["😡 Tá bom, mas eu vou continuar tentando!","🔥 Nem me conformo com esse 'não'!","💢 Olha o tamanho do 'sim' aí, vai negar isso?!","😤 Eu MEREÇO uma chance e você sabe disso!","👹 Recusar de novo? Essa raiva tá ficando grande...","🌋 Tô prestes a entrar em erupção de tanto 'não'!","😠 Esse botão de recusar já era pra ter sumido!","🥊 Tá testando minha paciência, hein?!","💥 BOOM! Mais um 'não' explodindo minha paciência","😾 Tá de sacanagem com esse tanto de 'não'?","😡 Quanto mais você recusa, mais eu insisto!","👊 Tô ficando teimoso igual você agora"],
@@ -87,7 +87,6 @@ function getPhase() {
   return "raiva";
 }
 
-// ── Posicionamento do botão Não ──────────────────────────────
 function getCardRect() {
   const card = document.querySelector(".card");
   return card ? card.getBoundingClientRect() : null;
@@ -149,7 +148,6 @@ function moveNoBtn() {
   noBtn.style.top  = ny + 'px';
 }
 
-// ── Crescimento do botão Sim ──────────────────────────────────
 const GROW_STEP = 3, EDGE_PAD = 16, ELEM_GAP = 16;
 
 function wouldHitSomething(testFs) {
@@ -187,7 +185,6 @@ function tryGrowYesBtn() {
   }
 }
 
-// ── Evade ────────────────────────────────────────────────────
 function onEvade() {
   if (accepted) return;
   attempts++;
@@ -196,7 +193,7 @@ function onEvade() {
   const phase = getPhase(), pool = phrases[phase] || phrases.curioso;
   messageEl.style.opacity = "0";
   setTimeout(() => {
-    messageEl.textContent   = pool[Math.floor(Math.random() * pool.length)];
+    messageEl.textContent  = pool[Math.floor(Math.random() * pool.length)];
     messageEl.style.opacity = "1";
     messageEl.style.animation = "msgFade 0.35s ease both";
   }, 180);
@@ -208,7 +205,6 @@ noBtn.addEventListener("mouseover",  onEvade);
 noBtn.addEventListener("touchstart", e => { e.preventDefault(); onEvade(); }, {passive:false});
 window.addEventListener("resize",    () => { if (!accepted) placeNoBtnInitial(); });
 
-// ── Corações ─────────────────────────────────────────────────
 function createHearts(n) {
   const icons = ["❤️","💖","💗","💘","💝","🌹","✨","💫","🎉","🥳"];
   for (let i = 0; i < n; i++) {
@@ -220,7 +216,6 @@ function createHearts(n) {
   }
 }
 
-// ── Aceitar ──────────────────────────────────────────────────
 yesBtn.addEventListener("click", () => {
   if (accepted) return;
   accepted = true;
